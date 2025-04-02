@@ -1,0 +1,94 @@
+{% extends "basic.html" %}
+
+{% block title %}
+Rental Requests
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-clipboard-list me-2"></i>Rental Requests</h2>
+        <a href="{{ url_for('provider_rental_items') }}" class="btn btn-primary">
+            <i class="fas fa-tools me-2"></i>Manage Rental Items
+        </a>
+    </div>
+    
+    <!-- Filter tabs -->
+    <ul class="nav nav-tabs mb-4" id="rentalRequestTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" 
+                    type="button" role="tab" aria-selected="true">
+                All Requests
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" 
+                    type="button" role="tab" aria-selected="false">
+                Pending
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" 
+                    type="button" role="tab" aria-selected="false">
+                Active Rentals
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" 
+                    type="button" role="tab" aria-selected="false">
+                Completed
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="rentalRequestTabContent">
+        <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+            {% include 'partials/rental_requests_table.html' with context %}
+        </div>
+        
+        <div class="tab-pane fade" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+            {% set filtered_requests = rental_requests|selectattr('status', 'equalto', 'pending')|list %}
+            {% include 'partials/rental_requests_table.html' with context %}
+        </div>
+        
+        <div class="tab-pane fade" id="active" role="tabpanel" aria-labelledby="active-tab">
+            {% set filtered_requests = rental_requests|selectattr('status', 'equalto', 'approved')|list %}
+            {% include 'partials/rental_requests_table.html' with context %}
+        </div>
+        
+        <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+            {% set filtered_requests = rental_requests|selectattr('status', 'in', ['completed', 'cancelled'])|list %}
+            {% include 'partials/rental_requests_table.html' with context %}
+        </div>
+    </div>
+    
+    <div class="card shadow mt-4">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0"><i class="fas fa-info-circle me-2"></i>Managing Rental Requests</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <h5><i class="fas fa-check-circle me-2 text-success"></i>Approving Requests</h5>
+                    <p>When you approve a request, the item will be marked as rented for the specified period. The renter will be notified that their request was approved.</p>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <h5><i class="fas fa-times-circle me-2 text-danger"></i>Rejecting Requests</h5>
+                    <p>If you reject a request, the item will remain available for others to rent. The renter will be notified that their request was rejected.</p>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <h5><i class="fas fa-calendar-check me-2 text-primary"></i>Completing Rentals</h5>
+                    <p>When a rental is complete and the item has been returned, mark it as "completed". This will make the item available for other renters.</p>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <h5><i class="fas fa-envelope me-2 text-info"></i>Communication</h5>
+                    <p>It's important to communicate with renters about pickup and return details. Make sure to check your contact information is up to date.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

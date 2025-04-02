@@ -1,0 +1,59 @@
+{% extends "basic.html" %}
+{% block title%}
+Login Page
+{% endblock %}
+{% block content%}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h2 class="mb-0"><i class="fas fa-user-circle me-2"></i>Login</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h4>Welcome Back!</h4>
+                        <p class="text-muted">Please login to your account</p>
+                    </div>
+                    
+                    <form method="POST" action="/login">
+                        <div class="form-group mb-3">
+                            <label for="user_type"><i class="fas fa-users me-2"></i>User Type</label>
+                            <select class="form-select" id="user_type" name="user_type" required>
+                                <option value="" disabled selected>Select your user type</option>
+                                <option value="admin">Admin</option>
+                                <option value="Service_Provider">Service Provider</option>
+                                <option value="user">User</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="username"><i class="fas fa-user me-2"></i>Username</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="password"><i class="fas fa-lock me-2"></i>Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="mb-2">Don't have an account?</p>
+                        <div class="d-grid gap-2">
+                            <a class="btn btn-outline-primary" href="{{url_for('registration_Service_Provider')}}">
+                                <i class="fas fa-user-tie me-2"></i>Register as Service Provider
+                            </a>
+                            <p class="my-2 text-muted">or</p>
+                            <a class="btn btn-outline-info" href="{{url_for('user_registration')}}">
+                                <i class="fas fa-user me-2"></i>Register as User
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock%}

@@ -1,0 +1,116 @@
+{% extends "basic.html" %}
+{% block title %}
+Edit Review
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h2 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Your Review</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h4>{{ review.service_provider.Fullname }}</h4>
+                        <p class="text-muted">{{ review.service_provider.service_name }}</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('edit_review', review_id=review.id) }}">
+                        <div class="form-group mb-4">
+                            <label class="form-label d-block"><i class="fas fa-star me-2"></i>Rating</label>
+                            <div class="rating-stars mb-2 fs-3">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        {% for i in range(1, 6) %}
+                                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" class="visually-hidden" {% if i == review.rating %}checked{% endif %}>
+                                            <label for="star{{ i }}" class="star-label text-warning" onclick="setRating({{ i }})">
+                                                <i id="starIcon{{ i }}" class="{% if i <= review.rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                    <span id="ratingText" class="ms-2 text-muted">
+                                        {% if review.rating == 1 %}Poor{% elif review.rating == 2 %}Fair{% elif review.rating == 3 %}Good{% elif review.rating == 4 %}Very Good{% else %}Excellent{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label for="comment"><i class="fas fa-comment me-2"></i>Your Review</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="4" placeholder="Share your experience with this service provider...">{{ review.comment }}</textarea>
+                            <small class="text-muted">Your honest feedback helps other users make informed decisions.</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Update Review
+                            </button>
+                            <a href="{{ url_for('provider_reviews', username=review.service_provider_username) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .star-label {
+        cursor: pointer;
+        margin-right: 5px;
+    }
+    .visually-hidden {
+        position: absolute;
+        clip: rect(0 0 0 0);
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+    }
+</style>
+
+<script>
+    function setRating(rating) {
+        // Update all stars
+        for (let i = 1; i <= 5; i++) {
+            const starIcon = document.getElementById(`starIcon${i}`);
+            if (i <= rating) {
+                starIcon.className = 'fas fa-star';
+            } else {
+                starIcon.className = 'far fa-star';
+            }
+        }
+        
+        // Set the rating text
+        const ratingText = document.getElementById('ratingText');
+        switch(rating) {
+            case 1:
+                ratingText.textContent = 'Poor';
+                break;
+            case 2:
+                ratingText.textContent = 'Fair';
+                break;
+            case 3:
+                ratingText.textContent = 'Good';
+                break;
+            case 4:
+                ratingText.textContent = 'Very Good';
+                break;
+            case 5:
+                ratingText.textContent = 'Excellent';
+                break;
+        }
+    }
+    
+    // Initialize with current rating
+    document.addEventListener('DOMContentLoaded', function() {
+        setRating({{ review.rating }});
+    });
+</script>
+{% endblock %}

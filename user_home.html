@@ -1,0 +1,145 @@
+{% extends 'basic.html'%}
+{% block title%}
+User Dashboard
+{% endblock%}
+{% block content%}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-clipboard-list me-2"></i>My Service Requests</h2>
+        <a href="{{ url_for('service') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>Request New Service
+        </a>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body p-0">
+            {% if request and request|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Customer Name</th>
+                                <th scope="col">Provider</th>
+                                <th scope="col">Service</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in request %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.Fullname }}</td>
+                                    <td>{{ user.Provider_username }}</td>
+                                    <td>{{ user.Service_required }}</td>
+                                    <td>{{ user.Description }}</td>
+                                    <td>
+                                        {% if user.status == 'pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif user.status == 'accepted_by_provider' %}
+                                            <span class="badge bg-info">Accepted</span>
+                                        {% elif user.status == 'rejected_by_provider' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% elif user.status == 'completed_by_provider' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif user.status == 'Cancelled_by_user' %}
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ user.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="{{ url_for('edit', id=user.id) }}" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>        
+                                            
+                                            {% if user.status != 'Cancelled_by_user' and user.status != 'completed_by_provider' %}
+                                                <form action="{{ url_for('cancel_request', id=user.id) }}" method="POST">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-times-circle"></i> Cancel
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                            
+                                            {% if user.status == 'accepted_by_provider' %}
+                                                <form action="{{ url_for('complete_request', id=user.id) }}" method="POST">
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                                        <i class="fas fa-check-circle"></i> Complete
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
+                    <h4>No service requests yet</h4>
+                    <p class="text-muted">Start by requesting a service from our providers</p>
+                    <a href="{{ url_for('service') }}" class="btn btn-primary mt-2">Browse Services</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Add a new section for completed services that can be reviewed -->
+    <div class="card shadow mt-4">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Completed Services - Leave a Review</h3>
+        </div>
+        <div class="card-body p-0">
+            {% set completed_services = [] %}
+            {% for item in request %}
+                {% if item.status == 'completed_by_provider' %}
+                    {% set completed_services = completed_services.append(item) %}
+                {% endif %}
+            {% endfor %}
+            
+            {% if completed_services and completed_services|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-info">
+                            <tr>
+                                <th>Provider</th>
+                                <th>Service</th>
+                                <th>Completion Date</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in completed_services %}
+                                <tr>
+                                    <td>{{ service.Provider_username }}</td>
+                                    <td>{{ service.Service_required }}</td>
+                                    <td>Recently</td>
+                                    <td class="text-center">
+                                        <a href="{{ url_for('add_review', provider_username=service.Provider_username) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-star me-1"></i>Review
+                                        </a>
+                                        <a href="{{ url_for('provider_reviews', username=service.Provider_username) }}" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-eye me-1"></i>View Reviews
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-clipboard-check fa-3x text-muted mb-3"></i>
+                    <h5>No completed services to review</h5>
+                    <p class="text-muted">You can leave reviews after your service requests are completed</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

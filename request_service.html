@@ -1,0 +1,97 @@
+{% extends "basic.html" %}
+{% block title %}
+Request Service
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h2 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Request Service</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <p class="text-muted">Fill out this form to request service from our providers</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('request_service_view') }}" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="Fullname"><i class="fas fa-user me-2"></i>Full Name</label>
+                                    <input type="text" class="form-control" id="Fullname" name="Fullname" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="Service_required"><i class="fas fa-tools me-2"></i>Service Required</label>
+                                    <input type="text" class="form-control" id="Service_required" name="Service_required" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="Description"><i class="fas fa-comment-alt me-2"></i>Description</label>
+                            <textarea class="form-control" id="Description" name="Description" rows="4" placeholder="Describe what you need help with..."></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="Provider_username"><i class="fas fa-user-tie me-2"></i>Provider Username</label>
+                                    <input type="text" class="form-control" id="Provider_username" name="Provider_username" 
+                                           value="{{ request.args.get('provider_username', '') }}" 
+                                           {% if request.args.get('provider_username') %}readonly{% endif %}>
+                                    {% if not request.args.get('provider_username') %}
+                                    <small class="text-muted">Enter the username of the service provider you want to request</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="User_username"><i class="fas fa-id-badge me-2"></i>Your Username</label>
+                                    <input type="text" class="form-control" id="User_username" name="User_username" value="{{current_user.username}}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if request.args.get('provider_username') %}
+                        <!-- Show provider location if coming from provider selection -->
+                        <div class="form-group mb-4">
+                            <label><i class="fas fa-map-marked-alt me-2"></i>Provider Location</label>
+                            <div class="map-container">
+                                <div id="providerLocationMap" class="provider-map"></div>
+                            </div>
+                        </div>
+                        
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Get provider data from backend using the username
+                                fetch(`/provider_info/{{ request.args.get('provider_username') }}`)
+                                    .then(response => response.json())
+                                    .then(provider => {
+                                        const address = `${provider.address}, ${provider.pincode}`;
+                                        initProviderMap(address, 'providerLocationMap', provider.Fullname);
+                                    })
+                                    .catch(error => console.error('Error fetching provider info:', error));
+                            });
+                        </script>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Request
+                            </button>
+                            <a href="{{ url_for('service') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Services
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

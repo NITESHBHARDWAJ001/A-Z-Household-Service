@@ -1,0 +1,466 @@
+{% extends "basic.html"%}
+{% block title%}
+Admin Dashboard
+{% endblock %}
+{% block content%}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-user-shield me-2"></i>Admin Dashboard</h2>
+        <div>
+            <a href="{{ url_for('add_service') }}" class="btn btn-success me-2">
+                <i class="fas fa-plus-circle me-2"></i>Add Service
+            </a>
+            <a href="{{ url_for('manage_users') }}" class="btn btn-danger">
+                <i class="fas fa-users-cog me-2"></i>Manage Users
+            </a>
+        </div>
+    </div>
+    
+    <!-- Overview Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-0">Total Services</h6>
+                            <h2 class="mt-2 mb-0">{{ services|length }}</h2>
+                        </div>
+                        <i class="fas fa-tools fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a href="#services-section" class="text-white">View Details</a>
+                    <i class="fas fa-angle-right text-white"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-0">Service Providers</h6>
+                            <h2 class="mt-2 mb-0">{{ total_providers }}</h2>
+                        </div>
+                        <i class="fas fa-user-tie fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a href="#providers-section" class="text-white">View Details</a>
+                    <i class="fas fa-angle-right text-white"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-0">Users</h6>
+                            <h2 class="mt-2 mb-0">{{ total_users }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a href="{{ url_for('manage_users') }}" class="text-white">View Details</a>
+                    <i class="fas fa-angle-right text-white"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-0">Rental Items</h6>
+                            <h2 class="mt-2 mb-0">{{ total_rental_items }}</h2>
+                        </div>
+                        <i class="fas fa-hand-holding-usd fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a href="#rentals-section" class="text-white">View Details</a>
+                    <i class="fas fa-angle-right text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="fas fa-user-clock me-2"></i>Pending Service Providers</h3>
+                </div>
+                <div class="card-body p-0">
+                    {% if service_providers and service_providers|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Username</th>
+                                        <th scope="col">Full Name</th>
+                                        <th scope="col">Service</th>
+                                        <th scope="col">Experience</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for service_provider in service_providers %}
+                                        <tr>
+                                            <td>{{ service_provider.username }}</td>
+                                            <td>{{ service_provider.Fullname }}</td>
+                                            <td>{{ service_provider.service_name }}</td>
+                                            <td>{{ service_provider.experience }} years</td>
+                                            <td>
+                                                <span class="badge bg-warning">{{ service_provider.status }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <a class="btn btn-sm btn-success me-2" href="{{ url_for('approve_service_provider', username=service_provider.username) }}">
+                                                    <i class="fas fa-check me-1"></i>Approve
+                                                </a>
+                                                <a class="btn btn-sm btn-danger" href="{{ url_for('reject_service_provider', username=service_provider.username) }}">
+                                                    <i class="fas fa-times me-1"></i>Reject
+                                                </a>
+                                            </td> 
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-check fa-3x text-muted mb-3"></i>
+                            <h5>No pending service provider applications</h5>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <!-- Provider Status Distribution -->
+            <div class="card shadow h-100">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Provider Status</h3>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="chart-container" style="position: relative; height:250px;">
+                        <canvas id="providerStatusChart"></canvas>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between text-center mt-3">
+                            <div>
+                                <h4>{{ provider_status.approved }}</h4>
+                                <p class="text-muted mb-0">Approved</p>
+                            </div>
+                            <div>
+                                <h4>{{ provider_status.pending }}</h4>
+                                <p class="text-muted mb-0">Pending</p>
+                            </div>
+                            <div>
+                                <h4>{{ provider_status.rejected }}</h4>
+                                <p class="text-muted mb-0">Rejected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Services Section -->
+    <div id="services-section" class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0"><i class="fas fa-list-alt me-2"></i>Available Services</h3>
+                    <a href="{{ url_for('add_service') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-plus me-1"></i>Add New
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if services and services|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Service Name</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Providers</th>
+                                        <th scope="col" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for service in services %}
+                                        <tr>
+                                            <td>{{ service.id }}</td>
+                                            <td>{{ service.name }}</td>
+                                            <td>{{ service.description }}</td>
+                                            <td>₹{{ service.price }}</td>
+                                            <td>
+                                                <span class="badge bg-info">{{ service_counts.get(service.name, 0) }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <a class="btn btn-sm btn-info me-2" href="{{ url_for('edit_service', id=service.id) }}">
+                                                    <i class="fas fa-edit me-1"></i>Edit
+                                                </a>
+                                                <a class="btn btn-sm btn-danger" href="{{ url_for('delete_service', id=service.id) }}"
+                                                   onclick="return confirm('Are you sure you want to delete this service?');">
+                                                    <i class="fas fa-trash-alt me-1"></i>Delete
+                                                </a>
+                                            </td> 
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-toolbox fa-3x text-muted mb-3"></i>
+                            <h5>No services available</h5>
+                            <a href="{{ url_for('add_service') }}" class="btn btn-primary mt-2">
+                                <i class="fas fa-plus-circle me-2"></i>Add First Service
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Provider Rankings Section -->
+    <div id="providers-section" class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="fas fa-trophy me-2"></i>Top Service Providers</h3>
+                </div>
+                <div class="card-body p-0">
+                    {% if top_providers and top_providers|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Rank</th>
+                                        <th scope="col">Provider</th>
+                                        <th scope="col">Service</th>
+                                        <th scope="col">Experience</th>
+                                        <th scope="col">Rating</th>
+                                        <th scope="col">Completed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for provider in top_providers %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ provider.Fullname }}</td>
+                                            <td>{{ provider.service_name }}</td>
+                                            <td>{{ provider.experience }} years</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="me-2">{{ provider.avg_rating|round(1) }}</span>
+                                                    <div class="text-warning">
+                                                        {% for i in range(1, 6) %}
+                                                            {% if i <= provider.avg_rating|round(0, 'common') %}
+                                                                <i class="fas fa-star"></i>
+                                                            {% elif i - 0.5 <= provider.avg_rating %}
+                                                                <i class="fas fa-star-half-alt"></i>
+                                                            {% else %}
+                                                                <i class="far fa-star"></i>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ provider.completed_services }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
+                            <h5>No rated service providers yet</h5>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0"><i class="fas fa-star me-2"></i>Service Category Ratings</h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:250px;">
+                        <canvas id="categoryRatingsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rental Items Section -->
+    <div id="rentals-section" class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="fas fa-hand-holding-usd me-2"></i>Rental Status</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container" style="position: relative; height:250px;">
+                                <canvas id="rentalStatusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th>Available</th>
+                                            <th>Rented</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for category, data in rental_categories.items() %}
+                                        <tr>
+                                            <td>{{ category }}</td>
+                                            <td><span class="badge bg-success">{{ data.available }}</span></td>
+                                            <td><span class="badge bg-danger">{{ data.rented }}</span></td>
+                                            <td>{{ data.total }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0"><i class="fas fa-fire me-2"></i>Most Requested Items</h3>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for item in top_rental_items %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">{{ item.name }}</h6>
+                                    <small class="text-muted">{{ item.category }}</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">{{ item.request_count }} requests</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Provider Status Chart
+        const statusCtx = document.getElementById('providerStatusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Approved', 'Pending', 'Rejected'],
+                datasets: [{
+                    data: [
+                        {{ provider_status.approved }},
+                        {{ provider_status.pending }},
+                        {{ provider_status.rejected }}
+                    ],
+                    backgroundColor: ['#4CAF50', '#FFC107', '#F44336']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Category Ratings Chart
+        const ratingsCtx = document.getElementById('categoryRatingsChart').getContext('2d');
+        new Chart(ratingsCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for category, rating in category_ratings.items() %}'{{ category }}',{% endfor %}],
+                datasets: [{
+                    label: 'Average Rating',
+                    data: [{% for category, rating in category_ratings.items() %}{{ rating }},{% endfor %}],
+                    backgroundColor: '#3F51B5'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // Rental Status Chart
+        const rentalCtx = document.getElementById('rentalStatusChart').getContext('2d');
+        new Chart(rentalCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Available', 'Rented'],
+                datasets: [{
+                    data: [
+                        {{ rental_status.available }},
+                        {{ rental_status.rented }}
+                    ],
+                    backgroundColor: ['#4CAF50', '#F44336']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock%}
