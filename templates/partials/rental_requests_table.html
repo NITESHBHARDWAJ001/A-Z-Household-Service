@@ -1,0 +1,78 @@
+{% set requests_to_display = filtered_requests|list if filtered_requests is defined else rental_requests %}
+
+{% if requests_to_display and requests_to_display|length > 0 %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>Item</th>
+                    <th>Customer</th>
+                    <th>Dates</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in requests_to_display %}
+                    <tr>
+                        <td>{{ request.item.name }}</td>
+                        <td>{{ request.user.Fullname }}</td>
+                        <td>
+                            <small>
+                                {{ request.start_date.strftime('%b %d, %Y') }} - {{ request.end_date.strftime('%b %d, %Y') }}
+                                <br>
+                                <span class="text-muted">{{ (request.end_date - request.start_date).days }} days</span>
+                            </small>
+                        </td>
+                        <td>₹{{ request.total_price }}</td>
+                        <td>
+                            {% if request.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% elif request.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif request.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% elif request.status == 'completed' %}
+                                <span class="badge bg-info">Completed</span>
+                            {% elif request.status == 'cancelled' %}
+                                <span class="badge bg-secondary">Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                {% if request.status == 'pending' %}
+                                    <form action="{{ url_for('approve_rental_request', request_id=request.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success"
+                                               onclick="return confirm('Are you sure you want to approve this rental request?');">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                    <form action="{{ url_for('reject_rental_request', request_id=request.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                               onclick="return confirm('Are you sure you want to reject this rental request?');">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                {% elif request.status == 'approved' %}
+                                    <form action="{{ url_for('complete_rental', request_id=request.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-success"
+                                               onclick="return confirm('Are you sure this rental is completed?');">
+                                            <i class="fas fa-check-circle me-1"></i>Complete
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
+        <h4>No rental requests found</h4>
+        <p class="text-muted">When you receive rental requests, they will appear here</p>
+    </div>
+{% endif %}

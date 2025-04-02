@@ -1,0 +1,356 @@
+{% extends "basic.html" %}
+
+{% block title %}
+Service Provider Dashboard
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-line me-2"></i>Provider Dashboard</h2>
+        <a href="{{ url_for('provider_requests') }}" class="btn btn-primary">
+            <i class="fas fa-clipboard-list me-2"></i>View Service Requests
+        </a>
+    </div>
+    
+    <!-- Welcome Card -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3 class="mb-2">Welcome, {{ provider.Fullname }}!</h3>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-tools me-2"></i>{{ provider.service_name }} | 
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ provider.pincode }} | 
+                        <i class="fas fa-briefcase me-2"></i>{{ provider.experience }} years experience
+                    </p>
+                    {% if avg_rating > 0 %}
+                    <div class="mt-2">
+                        <span class="me-2">Your Average Rating:</span>
+                        <span class="badge bg-warning fs-6 p-2">
+                            {{ avg_rating }} <i class="fas fa-star"></i>
+                        </span>
+                        <span class="ms-2 text-muted">({{ reviews|length }} reviews)</span>
+                    </div>
+                    {% else %}
+                    <div class="mt-2 text-muted">
+                        <i class="fas fa-info-circle me-1"></i>You don't have any reviews yet.
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <p class="mb-0"><strong>Status:</strong> <span class="badge bg-success">{{ provider.status|title }}</span></p>
+                    <p class="mb-0 mt-2"><strong>Account since:</strong> <span>2023</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Cards Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2 border-left-primary">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-primary"></i>
+                        </div>
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Requests
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">{{ total_requests }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2 border-left-success">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Completed
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">{{ completed_requests }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2 border-left-info">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <i class="fas fa-spinner fa-2x text-info"></i>
+                        </div>
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                In Progress
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">{{ accepted_requests }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2 border-left-warning">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                        </div>
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">{{ pending_requests }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Performance Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Service Request Status</h5>
+                </div>
+                <div class="card-body">
+                    {% if total_requests > 0 %}
+                    <div class="chart-container" style="position: relative; height:250px;">
+                        <canvas id="requestStatusChart"></canvas>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                        <h5>No Request Data Available</h5>
+                        <p class="text-muted">Once you start receiving requests, stats will appear here.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Completion Rate</h5>
+                </div>
+                <div class="card-body">
+                    {% if total_requests > 0 %}
+                    <div class="text-center py-4">
+                        <div class="chart-container" style="position: relative; height:200px;">
+                            <canvas id="completionRateChart"></canvas>
+                        </div>
+                        <div class="mt-3">
+                            <h4>{{ completion_rate }}%</h4>
+                            <p class="text-muted">Service Completion Rate</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                        <h5>No Completion Data Available</h5>
+                        <p class="text-muted">Complete your first service to see your completion rate.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activities & Reviews Row -->
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Recent Service Requests</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_requests and recent_requests|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Service</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in recent_requests %}
+                                <tr>
+                                    <td>#{{ request.id }}</td>
+                                    <td>{{ request.Fullname }}</td>
+                                    <td>{{ request.Service_required }}</td>
+                                    <td>
+                                        {% if request.status == 'pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif request.status == 'accepted_by_provider' %}
+                                            <span class="badge bg-info">In Progress</span>
+                                        {% elif request.status == 'completed_by_provider' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif request.status == 'rejected_by_provider' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% elif request.status == 'Cancelled_by_user' %}
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ request.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5>No Recent Requests</h5>
+                        <p class="text-muted">Your most recent service requests will appear here.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="{{ url_for('provider_requests') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-clipboard-list me-1"></i>View All Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Latest Reviews</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if reviews and reviews|length > 0 %}
+                        <div class="list-group list-group-flush">
+                            {% for review in reviews[:3] %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong>{{ review.user.Fullname }}</strong>
+                                    <div>
+                                        {% for i in range(1, 6) %}
+                                            {% if i <= review.rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="mb-1">{{ review.comment[:100] }}{% if review.comment|length > 100 %}...{% endif %}</p>
+                                <small class="text-muted">{{ review.created_at.strftime('%B %d, %Y') }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                        <h5>No Reviews Yet</h5>
+                        <p class="text-muted">Completed service requests can be reviewed by customers.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if reviews and reviews|length > 0 %}
+                <div class="card-footer bg-light">
+                    <a href="{{ url_for('provider_reviews', username=provider.username) }}" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-star me-1"></i>View All Reviews
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if total_requests > 0 %}
+        // Request Status Chart
+        const statusCtx = document.getElementById('requestStatusChart').getContext('2d');
+        const statusChart = new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Completed', 'In Progress', 'Pending', 'Rejected', 'Cancelled'],
+                datasets: [{
+                    data: [
+                        {{ completed_requests }}, 
+                        {{ accepted_requests }}, 
+                        {{ pending_requests }}, 
+                        {{ rejected_requests }}, 
+                        {{ cancelled_requests }}
+                    ],
+                    backgroundColor: [
+                        '#4CAF50', // success
+                        '#00BCD4', // info
+                        '#FFC107', // warning
+                        '#F44336', // danger
+                        '#6c757d'  // secondary
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Completion Rate Chart
+        const rateCtx = document.getElementById('completionRateChart').getContext('2d');
+        const rateChart = new Chart(rateCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Not Completed'],
+                datasets: [{
+                    data: [{{ completion_rate }}, {{ 100 - completion_rate }}],
+                    backgroundColor: [
+                        '#4CAF50', // success
+                        '#f8f9fa'  // light
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: false
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
+{% endblock %}

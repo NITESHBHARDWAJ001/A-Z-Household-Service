@@ -1,0 +1,85 @@
+{% extends "basic.html" %}
+
+{% block title %}
+Rental Items
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-hand-holding-usd me-2"></i>Browse Rental Items</h2>
+        <a href="{{ url_for('user_rentals') }}" class="btn btn-primary">
+            <i class="fas fa-clipboard-list me-2"></i>My Rental Requests
+        </a>
+    </div>
+    
+    <!-- Filter Categories -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('browse_rentals') }}" class="btn {% if not selected_category %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    All Categories
+                </a>
+                {% for category in categories %}
+                <a href="{{ url_for('browse_rentals', category=category) }}" 
+                   class="btn {% if selected_category == category %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ category|title }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rental Items Grid -->
+    <div class="row">
+        {% if items and items|length > 0 %}
+            {% for item in items %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow">
+                        {% if item.image_name %}
+                            <img src="{{ url_for('static', filename='rental_images/' + item.image_name) }}" 
+                                 class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ item.name }}">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-tools fa-4x text-muted"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            <p class="card-text text-muted">{{ item.description|truncate(100) }}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-primary">₹{{ item.daily_rate }}/day</span>
+                                    {% if item.category %}
+                                        <span class="badge bg-secondary">{{ item.category }}</span>
+                                    {% endif %}
+                                </div>
+                                <span class="badge {% if item.is_available %}bg-success{% else %}bg-danger{% endif %}">
+                                    {% if item.is_available %}Available{% else %}Unavailable{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Provider: {{ item.provider.Fullname }}</small>
+                                <a href="{{ url_for('view_rental_item', item_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-info-circle me-1"></i>Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>No rental items found in this category.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
