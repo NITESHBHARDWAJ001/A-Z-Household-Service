@@ -1,0 +1,85 @@
+{% extends "basic.html" %}
+{% block title %}
+Register Service Provider
+{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h2 class="mb-0"><i class="fas fa-user-tie me-2"></i>Service Provider Registration</h2>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-center mb-4">Please fill out the form below to register your service</p>
+                    
+                    <form class="registration-form" method="POST" action="/register_Service_Provider" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="Fullname"><i class="fas fa-user me-2"></i>Full Name</label>
+                                    <input type="text" class="form-control" id="Fullname" name="Fullname" placeholder="Enter your full name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="username"><i class="fas fa-at me-2"></i>Username</label>
+                                    <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="password"><i class="fas fa-lock me-2"></i>Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="service_name"><i class="fas fa-tools me-2"></i>Service</label>
+                                    <input type="text" class="form-control" id="service_name" name="service_name" placeholder="Enter your service type" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="experience"><i class="fas fa-briefcase me-2"></i>Experience (years)</label>
+                                    <input type="number" class="form-control" id="experiance" name="experience" min="0" placeholder="Your years of experience" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="address"><i class="fas fa-home me-2"></i>Address</label>
+                            <input type="text" class="form-control" id="address" name="address" placeholder="Enter your business address" required>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="pincode"><i class="fas fa-map-pin me-2"></i>Pincode</label>
+                            <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Area pincode" required>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label for="document"><i class="fas fa-file-alt me-2"></i>Upload Document</label>
+                            <input type="file" class="form-control" id="document" name="document" accept=".pdf, .doc, .docx" required>
+                            <small class="text-muted">Please upload proof of qualification/experience (PDF, DOC, DOCX)</small>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-check me-2"></i>Register
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Already have an account? <a href="{{ url_for('login') }}" class="text-primary">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
