@@ -9,7 +9,7 @@ import time
 import datetime as dt
 
 
-app = Flask(__name__, instance_path='/tmp'))
+app = Flask(__name__, instance_path='/tmp')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp/provider.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = '17ce2afd1bf4a1e4eecbfbdf'
