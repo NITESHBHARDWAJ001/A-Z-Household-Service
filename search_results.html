@@ -1,0 +1,267 @@
+{% extends "basic.html" %}
+
+{% block title %}
+Search Results
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0"><i class="fas fa-search me-2"></i>Search Results for "{{ query }}"</h2>
+        </div>
+        <div class="card-body">
+            {% if not service_providers and not services and not rental_items %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>No results found</h4>
+                    <p class="text-muted">Try searching with different keywords</p>
+                </div>
+            {% endif %}
+            
+            <!-- Rental Items Section -->
+            {% if rental_items %}
+                <h3 class="mt-4 mb-3"><i class="fas fa-hand-holding-usd me-2"></i>Rental Items</h3>
+                <div class="row">
+                    {% for item in rental_items %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow">
+                                {% if item.image_name %}
+                                    <img src="{{ url_for('static', filename='rental_images/' + item.image_name) }}" 
+                                         class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ item.name }}">
+                                {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <i class="fas fa-tools fa-4x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ item.name }}</h5>
+                                    <p class="card-text text-muted">{{ item.description|truncate(100) }}</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="badge bg-primary">₹{{ item.daily_rate }}/day</span>
+                                            {% if item.category %}
+                                                <span class="badge bg-secondary">{{ item.category }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="mt-2 mb-0">
+                                        <small class="text-muted">Provider: {{ item.provider.Fullname }}</small>
+                                    </p>
+                                </div>
+                                
+                                <div class="card-footer">
+                                    <a href="{{ url_for('view_rental_item', item_id=item.id) }}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-info-circle me-1"></i>View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Services Section -->
+            {% if services %}
+                <h3 class="mt-4 mb-3"><i class="fas fa-concierge-bell me-2"></i>Available Services</h3>
+                <div class="row">
+                    {% for service in services %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 border-primary">
+                                <div class="card-header bg-light">
+                                    <h5 class="card-title mb-0">{{ service.name }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">{{ service.description or "No description available" }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary">Price: ₹{{ service.price }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Service Providers Section -->
+            {% if service_providers %}
+                <h3 class="mt-4 mb-3"><i class="fas fa-map-marked-alt me-2"></i>Provider Locations</h3>
+                <div class="map-container">
+                    <div id="providersMap" class="provider-map"></div>
+                </div>
+                
+                <h3 class="mt-4 mb-3"><i class="fas fa-user-tie me-2"></i>Service Providers</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Provider Name</th>
+                                <th>Service</th>
+                                <th>Area</th>
+                                <th>Experience</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for provider in service_providers %}
+                                <tr>
+                                    <td>{{ provider.Fullname }}</td>
+                                    <td>
+                                        <span class="badge bg-info text-white">
+                                            <i class="fas fa-tools me-1"></i>{{ provider.service_name }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-map-marker-alt text-danger me-1"></i>{{ provider.pincode }}
+                                    </td>
+                                    <td>
+                                        {% if provider.experience > 5 %}
+                                            <span class="text-success"><i class="fas fa-star me-1"></i>{{ provider.experience }} years</span>
+                                        {% elif provider.experience > 2 %}
+                                            <span class="text-primary"><i class="fas fa-star-half-alt me-1"></i>{{ provider.experience }} years</span>
+                                        {% else %}
+                                            <span><i class="far fa-star me-1"></i>{{ provider.experience }} years</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#infoModal{{ provider.username|replace('.', '_') }}">
+                                                <i class="fas fa-info-circle me-1"></i>Details
+                                            </button>
+                                            <a class="btn btn-sm btn-outline-success" 
+                                               href="{{ url_for('request_service_view', provider_username=provider.username) }}">
+                                                <i class="fas fa-hand-pointer me-1"></i>Request
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Modal for provider info -->
+                                <div class="modal fade" id="infoModal{{ provider.username|replace('.', '_') }}" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title" id="infoModalLabel">
+                                                    <i class="fas fa-user-tie me-2"></i>{{ provider.Fullname }}
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="d-flex flex-column">
+                                                    <div class="mb-3">
+                                                        <h6 class="text-primary mb-2"><i class="fas fa-tools me-2"></i>Service</h6>
+                                                        <p>{{ provider.service_name }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6 class="text-primary mb-2"><i class="fas fa-briefcase me-2"></i>Experience</h6>
+                                                        <p>{{ provider.experience }} years</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6 class="text-primary mb-2"><i class="fas fa-map-marker-alt me-2"></i>Area</h6>
+                                                        <p>{{ provider.pincode }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6 class="text-primary mb-2"><i class="fas fa-map me-2"></i>Address</h6>
+                                                        <p>{{ provider.address }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <a class="btn btn-primary" href="{{ url_for('request_service_view', provider_username=provider.username) }}">
+                                                    Request Service
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Google Map with providers
+    function initProvidersMap() {
+        // Default center (can be set to user's location)
+        const center = { lat: 28.6139, lng: 77.2090 }; // Default to Delhi, India
+        
+        const map = new google.maps.Map(document.getElementById("providersMap"), {
+            zoom: 10,
+            center: center,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+        
+        const bounds = new google.maps.LatLngBounds();
+        const infoWindow = new google.maps.InfoWindow();
+        
+        {% if service_providers %}
+            {% for provider in service_providers %}
+                // We'll need to geocode the provider's address or pincode to get coordinates
+                // For this example, we're using a placeholder geocoding function
+                geocodeAddress("{{ provider.address }}, {{ provider.pincode }}", function(location) {
+                    if (location) {
+                        const marker = new google.maps.Marker({
+                            position: location,
+                            map: map,
+                            title: "{{ provider.Fullname }}"
+                        });
+                        
+                        bounds.extend(location);
+                        
+                        const content = `
+                            <div class="info-window">
+                                <h5>{{ provider.Fullname }}</h5>
+                                <p><strong>Service:</strong> {{ provider.service_name }}</p>
+                                <p><strong>Experience:</strong> {{ provider.experience }} years</p>
+                                <p><strong>Address:</strong> {{ provider.address }}</p>
+                                <a href="{{ url_for('request_service_view', provider_username=provider.username) }}" 
+                                   class="btn btn-sm btn-primary">Request Service</a>
+                            </div>
+                        `;
+                        
+                        marker.addListener("click", () => {
+                            infoWindow.setContent(content);
+                            infoWindow.open(map, marker);
+                        });
+                    }
+                });
+            {% endfor %}
+            
+            // Fit the map to show all markers
+            setTimeout(() => map.fitBounds(bounds), 1000);
+        {% endif %}
+    }
+    
+    // Geocode address to get coordinates
+    function geocodeAddress(address, callback) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: address }, (results, status) => {
+            if (status === "OK" && results[0]) {
+                callback(results[0].geometry.location);
+            } else {
+                console.error(`Geocode failed for address ${address}: ${status}`);
+                callback(null);
+            }
+        });
+    }
+    
+    // Initialize map when DOM is loaded
+    document.addEventListener("DOMContentLoaded", initProvidersMap);
+</script>
+{% endblock %}

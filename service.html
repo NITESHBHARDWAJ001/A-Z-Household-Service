@@ -1,0 +1,185 @@
+{% extends "basic.html" %}
+
+{% block title %}
+    Services
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-concierge-bell me-2"></i>Available Services</h2>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body p-0">
+            {% if items and items|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col">Provider Name</th>
+                                <th scope="col">Service</th>
+                                <th scope="col">Area Code</th>
+                                <th scope="col">Experience</th>
+                                <th scope="col">Rating</th>  <!-- Add new column for ratings -->
+                                <th scope="col">Username</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for provider in items %}
+                                {% if provider.status == 'approved' %}
+                                <tr>
+                                    <td>{{ provider.Fullname }}</td>
+                                    <td>
+                                        <span class="badge bg-info text-white">
+                                            <i class="fas fa-tools me-1"></i>{{ provider.service_name }}
+                                        </span>
+                                    </td>
+                                    <td><i class="fas fa-map-marker-alt text-danger me-1"></i>{{ provider.pincode }}</td>
+                                    <td>
+                                        {% if provider.experience > 5 %}
+                                            <span class="text-success"><i class="fas fa-star me-1"></i>{{ provider.experience }} years</span>
+                                        {% elif provider.experience > 2 %}
+                                            <span class="text-primary"><i class="fas fa-star-half-alt me-1"></i>{{ provider.experience }} years</span>
+                                        {% else %}
+                                            <span><i class="far fa-star me-1"></i>{{ provider.experience }} years</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set reviews = provider.reviews.all() %}
+                                        {% if reviews|length > 0 %}
+                                            {% set total = 0 %}
+                                            {% for review in reviews %}
+                                                {% set total = total + review.rating %}
+                                            {% endfor %}
+                                            {% set avg_rating = (total / reviews|length)|round(1) %}
+                                            <div class="d-flex align-items-center">
+                                                <span class="me-2">{{ avg_rating }}</span>
+                                                <div class="text-warning">
+                                                    {% for i in range(1, 6) %}
+                                                        {% if i <= avg_rating|round(0, 'common') %}
+                                                            <i class="fas fa-star"></i>
+                                                        {% elif i - 0.5 <= avg_rating %}
+                                                            <i class="fas fa-star-half-alt"></i>
+                                                        {% else %}
+                                                            <i class="far fa-star"></i>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                <span class="ms-2 text-muted">({{ reviews|length }})</span>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">No reviews</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ provider.username }}</td>
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#infoModal{{ provider.username|replace('.', '_') }}">
+                                                <i class="fas fa-info-circle me-1"></i>Info
+                                            </button>
+                                            <a class="btn btn-sm btn-outline-success" 
+                                               href="{{ url_for('request_service_view', provider_username=provider.username) }}">
+                                                <i class="fas fa-hand-pointer me-1"></i>Request
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Modal for provider info -->
+                                <div class="modal fade" id="infoModal{{ provider.username|replace('.', '_') }}" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title" id="infoModalLabel">
+                                                    <i class="fas fa-user-tie me-2"></i>{{ provider.Fullname }}
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex flex-column">
+                                                            <div class="mb-3">
+                                                                <h6 class="text-primary mb-2"><i class="fas fa-tools me-2"></i>Service</h6>
+                                                                <p>{{ provider.service_name }}</p>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <h6 class="text-primary mb-2"><i class="fas fa-briefcase me-2"></i>Experience</h6>
+                                                                <p>{{ provider.experience }} years</p>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <h6 class="text-primary mb-2"><i class="fas fa-map-marker-alt me-2"></i>Area</h6>
+                                                                <p>{{ provider.pincode }}</p>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <h6 class="text-primary mb-2"><i class="fas fa-map me-2"></i>Address</h6>
+                                                                <p>{{ provider.address }}</p>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <h6 class="text-primary mb-2"><i class="fas fa-star me-2"></i>Reviews</h6>
+                                                                {% set reviews = provider.reviews.all() %}
+                                                                {% if reviews|length > 0 %}
+                                                                    <div class="mb-2">
+                                                                        <span class="badge bg-warning">{{ (total / reviews|length)|round(1) }} <i class="fas fa-star"></i></span>
+                                                                        <span class="text-muted">({{ reviews|length }} reviews)</span>
+                                                                    </div>
+                                                                    <a href="{{ url_for('provider_reviews', username=provider.username) }}" class="btn btn-sm btn-outline-primary">
+                                                                        <i class="fas fa-comments me-1"></i>View All Reviews
+                                                                    </a>
+                                                                {% else %}
+                                                                    <p>No reviews yet</p>
+                                                                    {% if session.get('user_type') == 'user' %}
+                                                                        <a href="{{ url_for('add_review', provider_username=provider.username) }}" class="btn btn-sm btn-outline-primary">
+                                                                            <i class="fas fa-star me-1"></i>Be the first to review
+                                                                        </a>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-primary mb-2"><i class="fas fa-map-marked-alt me-2"></i>Location</h6>
+                                                        <div class="map-container">
+                                                            <div id="map{{ provider.username|replace('.', '_') }}" class="provider-map"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <a class="btn btn-primary" href="{{ url_for('request_service_view', provider_username=provider.username) }}">
+                                                    Request Service
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script>
+                                    // Initialize modal map when shown
+                                    document.getElementById('infoModal{{ provider.username|replace('.', '_') }}').addEventListener('shown.bs.modal', function() {
+                                        const address = "{{ provider.address }}, {{ provider.pincode }}";
+                                        const mapId = "map{{ provider.username|replace('.', '_') }}";
+                                        
+                                        initProviderMap(address, mapId, "{{ provider.Fullname }}");
+                                    });
+                                </script>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-tools fa-3x text-muted mb-3"></i>
+                    <h4>No service providers available</h4>
+                    <p class="text-muted">Please check back later for available services</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
