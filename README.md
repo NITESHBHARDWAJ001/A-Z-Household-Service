@@ -1,5 +1,4 @@
 # A-Z Household Service Platform
-
 A comprehensive web application connecting users with household service providers and equipment rentals. This platform offers a complete solution for household services and equipment rental needs.
 
 ## Features
